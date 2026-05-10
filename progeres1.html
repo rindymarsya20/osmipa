@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS MIPA Unpatti</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root{
+  --orange:#F08112;
+  --orange-dark:#C4660D;
+  --orange-glow:rgba(240,129,18,0.18);
+  --bg:#F7F5F2;
+  --card-bg:#FFFFFF;
+  --text-main:#1A1612;
+  --text-muted:#7A7269;
+  --border:#E5E1DA;
+  --input-bg:#F9F8F6;
+  --panel-w:45%;
+  --dur:0.65s;
+  --ease:cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  overflow:hidden;
+}
+
+.card{
+  position:relative;
+  width:100%;
+  max-width:980px;
+  height:600px;
+  background:var(--card-bg);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.04),
+    0 8px 32px rgba(0,0,0,0.09),
+    0 32px 64px rgba(0,0,0,0.07);
+}
+
+.form-half{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:calc(100% - var(--panel-w));
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:40px 48px;
+  background:var(--card-bg);
+  transition:opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.form-login{ right:0; }
+
+.form-register{
+  left:0;
+  opacity:0;
+  visibility:hidden;
+}
+
+.card.register-mode .form-login{
+  opacity:0;
+  visibility:hidden;
+}
+
+.card.register-mode .form-register{
+  opacity:1;
+  visibility:visible;
+}
+
+.img-panel{
+  position:absolute;
+  top:0; bottom:0;
+  width:var(--panel-w);
+  left:0;
+  background:url("unnamed.webp") no-repeat center center / cover;
+  z-index:10;
+  transition:left var(--dur) var(--ease);
+}
+
+.card.register-mode .img-panel{
+  left:calc(100% - var(--panel-w));
+}
+
+.img-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    160deg,
+    rgba(15,10,5,0.12) 0%,
+    rgba(15,10,5,0.52) 55%,
+    rgba(240,129,18,0.48) 100%
+  );
+}
+
+.curve-right{
+  position:absolute;
+  top:0; right:-1px;
+  height:100%; width:72px;
+}
+
+.curve-left{
+  position:absolute;
+  top:0; left:-1px;
+  height:100%; width:72px;
+  opacity:0;
+}
+
+.card.register-mode .curve-right{ opacity:0; }
+.card.register-mode .curve-left{ opacity:1; }
+
+.img-content{
+  position:absolute;
+  bottom:36px; left:36px; right:36px;
+  color:#fff;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,0.25);
+  padding:6px 14px;
+  border-radius:100px;
+  font-size:12px;
+  margin-bottom:14px;
+}
+
+.badge-dot{
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--orange);
+}
+
+.img-title{
+  font-family:'Playfair Display',serif;
+  font-size:26px; font-weight:700;
+  line-height:1.25;
+  margin-bottom:8px;
+}
+
+.img-sub{
+  font-size:13px;
+  opacity:0.75;
+  line-height:1.5;
+}
+
+.logo-wrap{
+  display:flex;
+  justify-content:center;
+  margin-bottom:16px;
+}
+
+.logo-wrap img{ height:46px; }
+
+h1{
+  font-family:'Playfair Display',serif;
+  font-size:28px;
+  margin-bottom:5px;
+}
+
+.sub-line{
+  font-size:14px;
+  color:var(--text-muted);
+}
+
+.sub-line a{
+  color:var(--orange);
+  cursor:pointer;
+  text-decoration:none;
+}
+
+.field{ margin-bottom:12px; }
+
+.field label{
+  display:block;
+  font-size:12px;
+  color:var(--text-muted);
+  margin-bottom:5px;
+}
+
+.input-wrap{ position:relative; }
+
+.input-wrap svg.fi{
+  position:absolute;
+  left:13px; top:50%;
+  transform:translateY(-50%);
+  width:16px; height:16px;
+  color:#BBBAB6;
+}
+
+input{
+  width:100%;
+  padding:10px 14px 10px 38px;
+  border-radius:12px;
+  border:1.5px solid var(--border);
+  background:var(--input-bg);
+  font-size:14px;
+  outline:none;
+  font-family:'DM Sans',sans-serif;
+}
+
+input:focus{
+  border-color:var(--orange);
+  background:#fff;
+  box-shadow:0 0 0 3px var(--orange-glow);
+}
+
+.fields-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 12px;
+}
+
+.field-full{ grid-column:1 / -1; }
+
+.primary-btn{
+  width:100%;
+  padding:13px;
+  background:var(--orange);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:15px;
+  font-family:'DM Sans',sans-serif;
+  font-weight:500;
+  transition:background 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.primary-btn:hover{ background:var(--orange-dark); }
+
+.primary-btn:disabled{
+  opacity:0.65;
+  cursor:not-allowed;
+}
+
+/* Spinner */
+.spinner{
+  width:16px; height:16px;
+  border:2px solid rgba(255,255,255,0.4);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin 0.7s linear infinite;
+  display:none;
+}
+
+.primary-btn.loading .spinner{ display:block; }
+.primary-btn.loading .btn-text{ display:none; }
+
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* Toast */
+.toast{
+  position:fixed;
+  bottom:32px; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#1A1612;
+  color:#fff;
+  padding:12px 22px;
+  border-radius:100px;
+  font-size:14px;
+  opacity:0;
+  transition:0.3s;
+  z-index:999;
+  white-space:nowrap;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+.toast.success{ background:#1a7a4a; }
+.toast.error{ background:#a32d2d; }
+
+@media (max-width:680px){
+  .img-panel{ display:none; }
+
+  .form-half{
+    width:100% !important;
+    left:0 !important; right:0 !important;
+    padding:32px 28px;
+  }
+
+  .form-register{
+    display:none;
+    opacity:1;
+    visibility:visible;
+  }
+
+  .card.register-mode .form-login{ display:none; }
+  .card.register-mode .form-register{ display:flex; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="card" id="card">
+
+  <!-- ══════════ FORM REGISTER ══════════ -->
+  <div class="form-half form-register">
+
+    <div class="logo-wrap">
+      <img src="Logo-OS-MIPA.jpeg" alt="Logo OS MIPA">
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <h1>Buat Akun</h1>
+      <p class="sub-line">
+        Sudah punya akun?
+        <a onclick="goToLogin()">Masuk</a>
+      </p>
+    </div>
+
+    <div class="fields-grid">
+
+      <div class="field">
+        <label>Nama Depan</label>
+        <div class="input-wrap">
+          <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input type="text" id="rFirst" placeholder="Nama depan" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Nama Belakang</label>
+        <div class="input-wrap">
+          <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input type="text" id="rLast" placeholder="Nama belakang" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field field-full">
+        <label>Email</label>
+        <div class="input-wrap">
+          <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+          <input type="email" id="rEmail" placeholder="Email" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field field-full">
+        <label>Kata Sandi</label>
+        <div class="input-wrap">
+          <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input type="password" id="rPwd" placeholder="Buat kata sandi (min. 6 karakter)" autocomplete="new-password">
+        </div>
+      </div>
+
+    </div>
+
+    <button class="primary-btn" id="btnRegister" style="margin-top:10px;" onclick="doRegister()">
+      <div class="spinner"></div>
+      <span class="btn-text">Buat Akun</span>
+    </button>
+
+  </div>
+
+  <!-- ══════════ FORM LOGIN ══════════ -->
+  <div class="form-half form-login">
+
+    <div class="logo-wrap">
+      <img src="Logo-OS-MIPA.jpeg" alt="Logo OS MIPA">
+    </div>
+
+    <div>
+      <h1>Masuk</h1>
+      <p class="sub-line">
+        Belum terdaftar?
+        <a onclick="goToRegister()">Daftar Sekarang</a>
+      </p>
+    </div>
+
+    <div class="field" style="margin-top:24px;">
+      <label>Email</label>
+      <div class="input-wrap">
+        <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+        <input type="email" id="lEmail" placeholder="Email" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Kata Sandi</label>
+      <div class="input-wrap">
+        <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <input type="password" id="lPwd" placeholder="Masukkan kata sandi" autocomplete="new-password">
+      </div>
+    </div>
+
+    <button class="primary-btn" id="btnLogin" onclick="doLogin()">
+      <div class="spinner"></div>
+      <span class="btn-text">Masuk</span>
+    </button>
+
+  </div>
+
+  <!-- ══════════ IMAGE PANEL ══════════ -->
+  <div class="img-panel">
+
+    <div class="img-overlay"></div>
+
+    <svg class="curve-right" viewBox="0 0 72 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M72,0 L28,0 Q-28,300 28,600 L72,600 Z" fill="white"/>
+    </svg>
+
+    <svg class="curve-left" viewBox="0 0 72 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 L44,0 Q100,300 44,600 L0,600 Z" fill="white"/>
+    </svg>
+
+    <div class="img-content">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        OS MIPA — Unpatti
+      </div>
+      <div class="img-title">
+        Olimpiade Sains<br>Fakultas MIPA
+      </div>
+      <div class="img-sub">
+        Portal pendaftaran resmi kompetisi sains Universitas Pattimura
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /.card -->
+
+<script>
+/* ══════════════════════════════════════════
+   ANIMASI PANEL
+══════════════════════════════════════════ */
+const card = document.getElementById('card');
+
+function goToRegister(){ card.classList.add('register-mode'); }
+function goToLogin()   { card.classList.remove('register-mode'); }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+let toastTimer;
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast ' + type;
+  void t.offsetWidth;          // reflow → restart transition
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function v(id) { return document.getElementById(id).value.trim(); }
+
+function setLoading(btnId, on) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+}
+
+/* ══════════════════════════════════════════
+   REGISTER  →  POST ke register.php
+══════════════════════════════════════════ */
+async function doRegister() {
+
+  const first = v('rFirst');
+  const last  = v('rLast');
+  const email = v('rEmail');
+  const pwd   = v('rPwd');
+
+  // Validasi sisi klien (cepat, sebelum request)
+  if (!first || !last || !email || !pwd)
+    return toast('⚠️ Semua kolom harus diisi', 'error');
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return toast('⚠️ Format email tidak valid', 'error');
+
+  if (pwd.length < 6)
+    return toast('⚠️ Kata sandi minimal 6 karakter', 'error');
+
+  setLoading('btnRegister', true);
+
+  try {
+    const res  = await fetch('register.php', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ namaDepan: first, namaBelakang: last, email, pwd })
+    });
+
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      toast('✅ ' + data.message, 'success');
+      ['rFirst','rLast','rEmail','rPwd']
+        .forEach(id => document.getElementById(id).value = '');
+      setTimeout(goToLogin, 1400);
+    } else {
+      toast('⚠️ ' + data.message, 'error');
+    }
+
+  } catch (err) {
+    toast('⚠️ Tidak dapat terhubung ke server', 'error');
+    console.error(err);
+  } finally {
+    setLoading('btnRegister', false);
+  }
+}
+
+/* ══════════════════════════════════════════
+   LOGIN  →  POST ke login.php
+══════════════════════════════════════════ */
+async function doLogin() {
+
+  const email = v('lEmail');
+  const pwd   = v('lPwd');
+
+  if (!email || !pwd)
+    return toast('⚠️ Masukkan email dan kata sandi', 'error');
+
+  setLoading('btnLogin', true);
+
+  try {
+    const res  = await fetch('login.php', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ email, pwd })
+    });
+
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      // Simpan sesi sederhana di sessionStorage
+      sessionStorage.setItem('osmipa_user', JSON.stringify(data.user));
+
+      toast(`✅ Selamat datang, ${data.user.namaDepan}!`, 'success');
+
+      // Arahkan ke halaman peserta setelah login berhasil
+      // Ganti 'LoginPeserta.html' sesuai halaman tujuan Anda
+      setTimeout(() => {
+        window.location.href = 'LoginPeserta.html';
+      }, 1500);
+
+    } else {
+      toast('⚠️ ' + data.message, 'error');
+    }
+
+  } catch (err) {
+    toast('⚠️ Tidak dapat terhubung ke server', 'error');
+    console.error(err);
+  } finally {
+    setLoading('btnLogin', false);
+  }
+}
+
+/* Enter key support */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (card.classList.contains('register-mode')) doRegister();
+  else doLogin();
+});
+
+/* Paksa kosongkan semua input saat halaman dimuat */
+window.addEventListener('load', () => {
+  ['lEmail','lPwd','rFirst','rLast','rEmail','rPwd']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+});
+</script>
+
+</body>
+</html>
